@@ -1252,10 +1252,11 @@ class ProxyServer:
 
                 if response is None:
                     # Relay through Apps Script
+                    script_id = self.fronter._script_id_for_key(self.fronter._host_key(url))
                     try:
                         response = await self._relay_smart(method, url, headers, body)
                     except Exception as e:
-                        log.error("Relay error (%s): %s", url[:60], e)
+                        log.error("Relay error (%s) [ScriptID: %s]: %s", url[:60], script_id, e)
                         err_body = f"Relay error: {e}".encode()
                         response = (
                             b"HTTP/1.1 502 Bad Gateway\r\n"
@@ -1290,7 +1291,8 @@ class ProxyServer:
             except ConnectionError:
                 break
             except Exception as e:
-                log.error("MITM handler error (%s): %s", host, e)
+                script_id = self.fronter._script_id_for_key(self.fronter._host_key(host))
+                log.error("MITM handler error (%s) [ScriptID: %s]: %s", host, script_id, e)
                 break
 
     # ── CORS helpers ──────────────────────────────────────────────
